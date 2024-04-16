@@ -3,11 +3,11 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "start": "node index.js 8080"
+        "start": "node backend/server.js"
     },
     "author": "Mikhail Shornikov",
     "dependencies": {
-        "serve-handler": "^6.1.5",
+        "uuid": "^9.0.1",
         "ws": "^8.16.0"
     }
 }
