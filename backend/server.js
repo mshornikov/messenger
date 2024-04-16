@@ -1,49 +1,68 @@
-import { WebSocketServer } from 'ws';
-import { v4 as uuid } from 'uuid';
-import { writeFile, readFileSync, existsSync } from 'fs';
-
-const LOG_FILE = './backend/log';
+import { WebSocketServer } from "ws";
+import { v4 as uuid } from "uuid";
+import mongoose from "mongoose";
 
 const clients = {};
 
-const log = existsSync(LOG_FILE) && readFileSync(LOG_FILE);
+const uri = "mongodb://localhost:27017";
+mongoose.connect(uri);
 
-const messages = JSON.parse(log) || [];
+const { connection } = mongoose;
+
+connection.once("open", () => {
+    console.log("MongoDB database connection established successfully");
+});
+
+const MessagesSchema = new mongoose.Schema({
+    author: {
+        type: String,
+        required: true,
+    },
+    text: {
+        type: String,
+        required: true,
+    },
+});
+
+const Message = mongoose.model("Message", MessagesSchema);
 
 const wss = new WebSocketServer({ port: 8000 });
 
-wss.on('connection', (ws) => {
+wss.on("connection", (ws) => {
     const id = uuid();
     clients[id] = ws;
 
     console.log(`New client ${id}`);
 
-    ws.send(JSON.stringify(messages));
+    Message.find().then((value) => {
+        ws.send(JSON.stringify(value));
+    });
 
-    ws.on('message', (rawMessage) => {
+    ws.on("message", (rawMessage) => {
         console.log(`Message: ${rawMessage}`);
 
-        const { name, message } = JSON.parse(rawMessage);
+        const messageObject = JSON.parse(rawMessage);
 
-        messages.push({ name, message });
+        const newMessage = new Message(messageObject);
+
+        newMessage.save();
 
         for (const id in clients) {
-            clients[id].send(JSON.stringify([{ name, message }]));
+            clients[id].send(JSON.stringify([messageObject]));
         }
     });
 
-    ws.on('close', () => {
+    ws.on("close", () => {
         delete clients[id];
 
         console.log(`Client is closed ${id}`);
     });
 });
 
-process.on('SIGINT', () => {
+process.on("SIGINT", async () => {
     wss.close();
-
-    writeFile(LOG_FILE, JSON.stringify(messages), (err) => {
-        if (err) console.log(err);
-        process.exit();
-    });
+    for (const ws of wss.clients) {
+        ws.terminate();
+    }
+    await mongoose.disconnect();
 });
