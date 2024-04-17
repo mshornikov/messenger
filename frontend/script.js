@@ -30,3 +30,46 @@ const send = (event) => {
 };
 
 formEl.addEventListener("submit", send);
+
+const signInForm = document.querySelector("#sign-in");
+
+signInForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const username = signInForm.querySelector("#username").value;
+    const password = signInForm.querySelector("#password").value;
+
+    console.log(username, password);
+
+    fetch("http://localhost:3000/signin", {
+        method: "post",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+    })
+        .then((res) => {
+            if (res.ok) return res.json();
+        })
+        .then(({ username }) => {
+            const author = document.querySelector("#author");
+            author.value = username;
+        });
+});
+
+const signUpForm = document.querySelector("#sign-up");
+
+signUpForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const username = signUpForm.querySelector("#username").value;
+    const password = signUpForm.querySelector("#password").value;
+
+    console.log(username, password);
+
+    fetch("http://localhost:3000/signup", {
+        method: "post",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+    });
+});

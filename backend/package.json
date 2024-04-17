@@ -3,10 +3,11 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "start": "node backend/server.js"
+        "start": "node server.js"
     },
     "author": "Mikhail Shornikov",
     "dependencies": {
+        "express": "^4.19.2",
         "mongoose": "^8.3.2",
         "uuid": "^9.0.1",
         "ws": "^8.16.0"

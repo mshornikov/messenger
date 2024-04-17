@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="style.css">
     <title>Messenger</title>
     <script src="./script.js" defer></script>
 </head>
@@ -12,8 +13,20 @@
 <body>
     <ul id="chat"></ul>
 
+    <form id="sign-up" method="post">
+        <input type="text" id="username" name="username">
+        <input type="password" id="password" name="password">
+        <button type="submit">Sing up</button>
+    </form>
+
+    <form id="sign-in" method="post">
+        <input type="text" id="username" name="username">
+        <input type="password" id="password" name="password">
+        <button type="submit">Sign in</button>
+    </form>
+
     <form id="message-form" method="post">
-        <input type="text" id="author" name="author">
+        <input type="hidden" id="author" name="author">
         <input type="text" id="text" name="text">
         <button>Send</button>
     </form>

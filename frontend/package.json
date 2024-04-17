@@ -1,0 +1,12 @@
+{
+    "name": "messenger",
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "dev": "vite"
+    },
+    "author": "Mikhail Shornikov",
+    "devDependencies": {
+        "vite": "^5.2.9"
+    }
+}
