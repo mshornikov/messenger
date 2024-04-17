@@ -4,7 +4,10 @@ import mongoose from "mongoose";
 
 const clients = {};
 
-const uri = "mongodb://localhost:27017";
+const PORT = 8000;
+const DB_PORT = 27017;
+
+const uri = `mongodb://localhost:${DB_PORT}`;
 mongoose.connect(uri);
 
 const { connection } = mongoose;
@@ -26,7 +29,7 @@ const MessagesSchema = new mongoose.Schema({
 
 const Message = mongoose.model("Message", MessagesSchema);
 
-const wss = new WebSocketServer({ port: 8000 });
+const wss = new WebSocketServer({ port: PORT });
 
 wss.on("connection", (ws) => {
     const id = uuid();

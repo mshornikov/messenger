@@ -24,6 +24,8 @@ const send = (event) => {
     const author = document.querySelector("#author").value;
     const text = document.querySelector("#text").value;
 
+    if (!text) return;
+
     ws.send(JSON.stringify({ author, text }));
 };
 
