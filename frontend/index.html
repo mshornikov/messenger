@@ -5,26 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="manifest" href="/manifest.json">
     <title>Messenger</title>
-    <script src="./script.js" defer></script>
+    <script src="/script.js" defer></script>
 </head>
 
 <body>
-    <ul id="chat"></ul>
-
-    <form id="sign-up" method="post">
-        <label>
-            Username
-            <input type="text" id="username" name="username">
-        </label>
-        <label>
-            Password
-            <input type="password" id="password" name="password">
-        </label>
-        <button type="submit">Sing up</button>
-    </form>
-
     <form id="sign-in" method="post">
         <label>
             Username
@@ -37,14 +24,33 @@
         <button type="submit">Sign in</button>
     </form>
 
-    <form id="message-form" method="post">
-        <input type="hidden" id="author" name="author">
+    <main class="container">
+
+        <ul class="chat" id="chat"></ul>
+
+        <form class="message-block" id="message-form" method="post">
+            <input type="hidden" id="author" name="author" value="mshornikov">
+            <input type="text" class="message-input message-block__text" id="text" name="text" placeholder="Message">
+            <button class="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                    viewBox="0 -960 960 960" fill="white" style="vertical-align: middle; display: block;">
+                    <path
+                        d="M808-438 163-167q-23 10-43-3t-20-37v-546q0-23 20-36t43-6l645 272q28 12 28 43.5T808-438ZM181-264l515-216-515-218v146l252 72-252 71v145Zm0 0v-434 434Z" />
+                </svg></button>
+        </form>
+    </main>
+
+    <!-- <form id="sign-up" method="post">
         <label>
-            Message
-            <input type="text" id="text" name="text">
+            Username
+            <input type="text" id="username" name="username">
         </label>
-        <button>Send</button>
-    </form>
+        <label>
+            Password
+            <input type="password" id="password" name="password">
+        </label>
+        <button type="submit">Sing up</button>
+    </form> -->
+
 </body>
 
 </html>

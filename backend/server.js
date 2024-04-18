@@ -54,9 +54,12 @@ wss.on("connection", (ws) => {
         const newMessage = new Message(messageObject);
 
         newMessage.save();
+        console.log(rawMessage);
 
-        for (const id in clients) {
-            clients[id].send(JSON.stringify([messageObject]));
+        for (const client in clients) {
+            if (client !== id) {
+                clients[client].send(JSON.stringify([messageObject]));
+            }
         }
     });
 

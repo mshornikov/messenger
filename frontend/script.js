@@ -1,7 +1,33 @@
 const chatEl = document.querySelector("#chat");
 const formEl = document.querySelector("#message-form");
 
-const ws = new WebSocket(`ws://localhost:8000`);
+const ws = new WebSocket(`ws://192.168.0.144:8000`);
+
+const printMessage = (isOwn, { author, text }) => {
+    const messageEl = document.createElement("li");
+    messageEl.classList.add("message");
+    messageEl.classList.add("chat__message");
+
+    const messageClassModifier = isOwn
+        ? "chat__message--right"
+        : "chat__message--left";
+
+    messageEl.classList.add(messageClassModifier);
+
+    if (!isOwn) {
+        const authorEl = document.createElement("div");
+        authorEl.classList.add("message__author");
+        authorEl.innerText = author;
+        messageEl.appendChild(authorEl);
+    }
+
+    const textEl = document.createElement("span");
+    textEl.innerText = text;
+
+    messageEl.appendChild(textEl);
+
+    chatEl.appendChild(messageEl);
+};
 
 ws.onmessage = ({ data }) => {
     const messages = JSON.parse(data);
@@ -9,9 +35,9 @@ ws.onmessage = ({ data }) => {
     console.log(messages);
 
     for (const message of messages) {
-        const messageEl = document.createElement("li");
-        messageEl.innerText = `${message.author}: ${message.text}`;
-        chatEl.appendChild(messageEl);
+        const author = document.querySelector("#author").value;
+        const isOwn = author === message.author;
+        printMessage(isOwn, message);
     }
 };
 
@@ -22,11 +48,14 @@ ws.onclose = () => {
 const send = (event) => {
     event.preventDefault();
     const author = document.querySelector("#author").value;
-    const text = document.querySelector("#text").value;
+    const textEl = document.querySelector("#text");
 
-    if (!text) return;
+    if (!textEl.value) return;
 
-    ws.send(JSON.stringify({ author, text }));
+    ws.send(JSON.stringify({ author, text: textEl.value }));
+    printMessage(true, { author, text: textEl.value });
+
+    textEl.value = "";
 };
 
 formEl.addEventListener("submit", send);
