@@ -119,16 +119,6 @@ app.post("/signin", async (req, res) => {
             return res.status(400).json({ error: "User not found" });
         }
 
-        // const isMatch = await bcrypt.compare(password, user.password);
-
-        // if (!isMatch) {
-        //     return res.status(400).json({ error: "Invalid credentials" });
-        // }
-
-        // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        //     expiresIn: "1h",
-        // });
-
         res.send({ username: signInData.username });
     } catch (error) {
         console.error(error.message);
@@ -136,12 +126,14 @@ app.post("/signin", async (req, res) => {
     }
 });
 
-app.listen(3000);
+const server = app.listen(3000);
 
-// process.on("SIGINT", async () => {
-//     wss.close();
-//     for (const ws of wss.clients) {
-//         ws.terminate();
-//     }
-//     await mongoose.disconnect();
-// });
+process.on("SIGINT", async () => {
+    wss.close();
+    for (const ws of wss.clients) {
+        ws.terminate();
+    }
+    await mongoose.disconnect();
+
+    server.close();
+});
