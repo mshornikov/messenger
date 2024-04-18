@@ -71,6 +71,7 @@ const UserSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
+        unique: true,
     },
     password: {
         type: String,
@@ -99,13 +100,16 @@ app.post("/signup", async (req, res) => {
     console.log(signUpData);
 
     try {
-        const newUser = new User(signUpData);
-        newUser.save();
-
-        res.send();
+        await User.create(signUpData);
     } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ error: "Server error" });
+        console.log(JSON.stringify(error));
+        if (error.code === 11000) {
+            return res.status(400).send({
+                status: "error",
+                error: "username already exists",
+            });
+        }
+        throw error;
     }
 });
 
