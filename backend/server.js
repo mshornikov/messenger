@@ -1,7 +1,6 @@
 import { WebSocketServer } from "ws";
-import { v4 as uuid } from "uuid";
 import mongoose from "mongoose";
-
+import { randomUUID } from 'node:crypto';
 import express from "express";
 
 const app = express();
@@ -37,7 +36,7 @@ const Message = mongoose.model("Message", MessagesSchema);
 const wss = new WebSocketServer({ port: PORT });
 
 wss.on("connection", (ws) => {
-    const id = uuid();
+    const id = randomUUID();
     clients[id] = ws;
 
     console.log(`New client ${id}`);
