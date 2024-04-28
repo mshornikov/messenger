@@ -1,8 +1,12 @@
 const chatEl = document.querySelector("#chat");
 const formEl = document.querySelector("#message-form");
 
-const ws = new WebSocket(`ws://192.168.0.144:8000`);
+const ws = new WebSocket(`ws://localhost:8000`);
 
+/**
+ * @param {boolean} isOwn
+ * @param {{ author: string, text: string }} messageInfo
+ */
 const printMessage = (isOwn, { author, text }) => {
     const messageEl = document.createElement("li");
     messageEl.classList.add("message");
@@ -29,6 +33,8 @@ const printMessage = (isOwn, { author, text }) => {
     chatEl.appendChild(messageEl);
 };
 
+printMessage(1, "123");
+
 ws.onmessage = ({ data }) => {
     const messages = JSON.parse(data);
 
@@ -45,6 +51,9 @@ ws.onclose = () => {
     ws.close();
 };
 
+/**
+ * @param {SubmitEvent} event
+ */
 const send = (event) => {
     event.preventDefault();
     const author = document.querySelector("#author").value;

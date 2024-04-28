@@ -1,7 +1,8 @@
 import { WebSocketServer } from "ws";
 import mongoose from "mongoose";
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import express from "express";
+import http from "node:http";
 
 const app = express();
 app.use(express.json());
@@ -83,6 +84,8 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema);
 
+const server = http.createServer();
+
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
@@ -132,7 +135,7 @@ app.post("/signin", async (req, res) => {
     }
 });
 
-const server = app.listen(3000);
+// const server = app.listen(3000);
 
 process.on("SIGINT", async () => {
     wss.close();
