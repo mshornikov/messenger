@@ -82,6 +82,10 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema);
 
+/**
+ * @param {http.IncomingMessage} res
+ * @param {string} data
+ */
 const signIn = async (res, data) => {
     const signInData = JSON.parse(data);
 
@@ -104,6 +108,10 @@ const signIn = async (res, data) => {
     }
 };
 
+/**
+ * @param {http.IncomingMessage} res
+ * @param {string} data
+ */
 const signUp = async (res, data) => {
     const signUpData = JSON.parse(data);
 
