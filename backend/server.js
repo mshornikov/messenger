@@ -1,11 +1,9 @@
+import { randomUUID } from "node:crypto";
+import http from "node:http";
+import url from "node:url";
+
 import { WebSocketServer } from "ws";
 import mongoose from "mongoose";
-import { randomUUID } from "node:crypto";
-import express from "express";
-import http from "node:http";
-
-const app = express();
-app.use(express.json());
 
 const clients = {};
 
@@ -84,9 +82,49 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema);
 
-const server = http.createServer();
+const signIn = async (res, data) => {
+    const signInData = JSON.parse(data);
 
-app.use((req, res, next) => {
+    console.log("singIn", signInData);
+
+    try {
+        const user = await User.findOne(signInData);
+
+        if (!user) {
+            res.statusCode = 400;
+            res.write("User not found");
+            return;
+        }
+        res.write(JSON.stringify({ username: signInData.username }));
+    } catch (error) {
+        res.statusCode = 500;
+        res.write("Server error");
+    } finally {
+        res.end();
+    }
+};
+
+const signUp = async (res, data) => {
+    const signUpData = JSON.parse(data);
+
+    console.log("singUp", signUpData);
+
+    try {
+        await User.create(signUpData);
+        res.statusCode = 201;
+        res.write("User created");
+    } catch (error) {
+        console.log(JSON.stringify(error));
+        if (error.code === 11000) {
+            res.statusCode = 400;
+            res.write("Username already exists");
+        }
+    } finally {
+        res.end();
+    }
+};
+
+const server = http.createServer((req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
         "Access-Control-Allow-Methods",
@@ -96,46 +134,31 @@ app.use((req, res, next) => {
         "Access-Control-Allow-Headers",
         "origin, x-requested-with, content-type"
     );
-    next();
-});
 
-app.post("/signup", async (req, res) => {
-    const signUpData = req.body;
+    switch (req.method) {
+        case "OPTIONS":
+            res.end();
+            break;
+        case "POST":
+            let data = "";
 
-    console.log(signUpData);
-
-    try {
-        await User.create(signUpData);
-    } catch (error) {
-        console.log(JSON.stringify(error));
-        if (error.code === 11000) {
-            return res.status(400).send({
-                status: "error",
-                error: "username already exists",
+            req.on("data", (chunk) => {
+                data += chunk;
             });
-        }
-        throw error;
+
+            const reqUrl = url.parse(req.url).pathname;
+
+            if (reqUrl === "/signup") req.on("end", () => signUp(res, data));
+            if (reqUrl === "/signin") req.on("end", () => signIn(res, data));
+            break;
+        default:
+            res.end();
     }
 });
 
-app.post("/signin", async (req, res) => {
-    const signInData = req.body;
-    console.log(signInData);
-    try {
-        const user = await User.findOne(signInData);
-
-        if (!user) {
-            return res.status(400).json({ error: "User not found" });
-        }
-
-        res.send({ username: signInData.username });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ error: "Server error" });
-    }
+server.listen(3000, "127.0.0.1", () => {
+    console.log("Server running");
 });
-
-// const server = app.listen(3000);
 
 process.on("SIGINT", async () => {
     wss.close();
