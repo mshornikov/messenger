@@ -78,8 +78,9 @@ signInForm.addEventListener("submit", (event) => {
 
     console.log(username, password);
 
-    fetch("http://localhost:3000/signin", {
+    fetch("http://localhost:3001/signin", {
         method: "post",
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
         },

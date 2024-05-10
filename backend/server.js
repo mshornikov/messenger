@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import http from "node:http";
 import url from "node:url";
 
@@ -10,7 +10,7 @@ const clients = {};
 const PORT = 8000;
 const DB_PORT = 27017;
 
-const uri = `mongodb://localhost:${DB_PORT}`;
+const uri = `mongodb://localhost:${DB_PORT}/messenger`;
 mongoose.connect(uri);
 
 const { connection } = mongoose;
@@ -74,6 +74,16 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    salt: {
+        type: String,
+        required: true,
+        unique: false,
+    },
+    userId: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     password: {
         type: String,
         required: true,
@@ -87,19 +97,31 @@ const User = mongoose.model("User", UserSchema);
  * @param {string} data
  */
 const signIn = async (res, data) => {
-    const signInData = JSON.parse(data);
+    const { username, password } = JSON.parse(data);
 
-    console.log("singIn", signInData);
+    console.log("singIn", { username, password });
 
     try {
-        const user = await User.findOne(signInData);
+        const user = await User.findOne({ username: username });
 
         if (!user) {
             res.statusCode = 400;
             res.write("User not found");
             return;
         }
-        res.write(JSON.stringify({ username: signInData.username }));
+
+        const salted = `${password}${user.salt}`;
+        const hash = createHash("sha256");
+        const hashed = hash.update(salted).digest("hex");
+        console.log("hashed", hashed);
+
+        if (hashed === user.password) {
+            const sessionId = randomUUID();
+            res.writeHead(200, {
+                "Set-Cookie": `sessionId=${sessionId}`,
+                "Content-Type": "text/plain",
+            });
+        }
     } catch (error) {
         res.statusCode = 500;
         res.write("Server error");
@@ -113,12 +135,23 @@ const signIn = async (res, data) => {
  * @param {string} data
  */
 const signUp = async (res, data) => {
-    const signUpData = JSON.parse(data);
+    const { username, password } = JSON.parse(data);
+    const salt = randomUUID();
+    console.log("salt", salt);
+    const salted = `${password}${salt}`;
+    console.log("salted", salted);
 
-    console.log("singUp", signUpData);
+    const hash = createHash("sha256");
+    const hashed = hash.update(salted).digest("hex");
+    console.log("hashed", hashed);
+
+    const userId = randomUUID();
+    console.log("userId:", userId);
+
+    console.log("singUp", { username, salt, userId, hashed });
 
     try {
-        await User.create(signUpData);
+        await User.create({ username, salt, userId, password: hashed });
         res.statusCode = 201;
         res.write("User created");
     } catch (error) {
@@ -133,15 +166,16 @@ const signUp = async (res, data) => {
 };
 
 const server = http.createServer((req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
     res.setHeader(
         "Access-Control-Allow-Methods",
         "GET,POST,OPTIONS,DELETE,PUT"
     );
     res.setHeader(
         "Access-Control-Allow-Headers",
-        "origin, x-requested-with, content-type"
+        "origin, x-requested-with, content-type, credentials"
     );
+    res.setHeader("Access-Control-Allow-Credentials", "true");
 
     switch (req.method) {
         case "OPTIONS":
@@ -164,7 +198,7 @@ const server = http.createServer((req, res) => {
     }
 });
 
-server.listen(3000, "127.0.0.1", () => {
+server.listen(3001, "127.0.0.1", () => {
     console.log("Server running");
 });
 
