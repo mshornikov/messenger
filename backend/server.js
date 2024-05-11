@@ -21,10 +21,12 @@ connection.once("open", () => {
 });
 
 const MessagesSchema = new mongoose.Schema({
+    to: String,
     author: {
         type: String,
         required: true,
     },
+    timeStamp: String,
     text: {
         type: String,
         required: true,
@@ -35,41 +37,73 @@ const Message = mongoose.model("Message", MessagesSchema);
 
 const wss = new WebSocketServer({ noServer: true });
 
-wss.on("connection", (ws) => {
-    const id = randomUUID();
-    clients[id] = ws;
+wss.on("connection", (ws, _, sessionId) => {
+    clients[sessionId] = ws;
 
-    console.log(`New client ${id}`);
+    console.log(`New client ${sessionId}`);
 
-    Message.find().then((data) => {
-        const messages = data.map(({ author, text }) => {
-            return { author, text };
+    Message.find().then(async (data) => {
+        const { username } = await Session.findOne({ _id: sessionId });
+
+        const messages = data.map(({ author, text, timeStamp, to }) => {
+            if (to === "all" || to === username || author === username) {
+                return { author, text, timeStamp };
+            }
+            return;
         });
 
         ws.send(JSON.stringify(messages));
     });
 
-    ws.on("message", (rawMessage) => {
+    ws.on("message", async (rawMessage) => {
         console.log(`Message: ${rawMessage}`);
 
         const messageObject = JSON.parse(rawMessage);
 
-        const newMessage = new Message(messageObject);
+        if (messageObject.to !== "all") {
+            try {
+                const recipientUser = await User.findOne({
+                    username: messageObject.to,
+                });
 
-        newMessage.save();
-        console.log(rawMessage);
+                if (recipientUser) {
+                    const newMessage = new Message(messageObject);
 
-        for (const client in clients) {
-            if (client !== id) {
-                clients[client].send(JSON.stringify([messageObject]));
+                    newMessage.save();
+                    console.log(rawMessage);
+
+                    const recipientSession = await Session.findOne({
+                        username: messageObject.to,
+                    });
+
+                    if (recipientSession) {
+                        console.log(recipientSession._id);
+                        clients[recipientSession._id].send(
+                            JSON.stringify([messageObject])
+                        );
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            const newMessage = new Message(messageObject);
+
+            newMessage.save();
+            console.log(rawMessage);
+
+            for (const client in clients) {
+                if (client !== sessionId) {
+                    clients[client].send(JSON.stringify([messageObject]));
+                }
             }
         }
     });
 
     ws.on("close", () => {
-        delete clients[id];
+        delete clients[sessionId];
 
-        console.log(`Client is closed ${id}`);
+        console.log(`Client is closed ${sessionId}`);
     });
 });
 
@@ -192,7 +226,7 @@ const signUp = async (res, data) => {
 const getInfo = async (req, res) => {
     /** @type {string} */
     const cookieHeader = req.headers?.cookie;
-    console.log(cookieHeader);
+
     if (cookieHeader) {
         const sessionId = cookieHeader.match(/sessionId=(.*)/)[1];
         try {
@@ -295,10 +329,11 @@ server.listen(SERVER_PORT);
 
 server.on("upgrade", async (request, socket, head) => {
     const cookieHeader = request.headers?.cookie;
-    console.log("cookie", cookieHeader);
-
+    let sessionId;
     if (cookieHeader) {
-        const sessionId = cookieHeader.match(/sessionId=(.*)/)[1];
+        const sessionString = cookieHeader.match(/sessionId=(.*)/);
+        if (sessionString) sessionId = sessionString[1];
+        else return;
         const userData = await Session.findById(sessionId);
         if (!userData) {
             socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
@@ -309,18 +344,8 @@ server.on("upgrade", async (request, socket, head) => {
         return;
     }
 
-    // if (!authed) {
-    //     // \r\n\r\n: These are control characters used in HTTP to
-    //     // denote the end of the HTTP headers section.
-    //     socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-    //     socket.destroy();
-    //     return;
-    // }
-
     wss.handleUpgrade(request, socket, head, (connection) => {
-        // Manually emit the 'connection' event on a WebSocket
-        // server (we subscribe to this event below).
-        wss.emit("connection", connection, request);
+        wss.emit("connection", connection, request, sessionId);
     });
 });
 

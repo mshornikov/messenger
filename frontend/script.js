@@ -6,9 +6,9 @@ const SERVER_HOST = "http://localhost:3001";
 
 /**
  * @param {boolean} isOwn
- * @param {{ author: string, text: string }} messageInfo
+ * @param {{ author: string, text: string, timeStamp: string }} messageInfo
  */
-const printMessage = (isOwn, { author, text }) => {
+const printMessage = (isOwn, { author, text, timeStamp }) => {
     const messageEl = document.createElement("li");
     messageEl.classList.add("message");
     messageEl.classList.add("chat__message");
@@ -29,7 +29,13 @@ const printMessage = (isOwn, { author, text }) => {
     const textEl = document.createElement("span");
     textEl.innerText = text;
 
+    const timeStampEl = document.createElement("div");
+    timeStampEl.innerText = new Date(timeStamp).toLocaleTimeString([], {
+        timeStyle: "short",
+    });
+
     messageEl.appendChild(textEl);
+    messageEl.appendChild(timeStampEl);
 
     chatEl.appendChild(messageEl);
 };
@@ -64,13 +70,19 @@ connect();
  */
 const send = (event) => {
     event.preventDefault();
-    const author = document.querySelector("#author").value;
-    const textEl = document.querySelector("#text");
+    const author = formEl.querySelector("#author").value;
+    const textEl = formEl.querySelector("#text");
+    const toEl = formEl.querySelector("#to");
+    const timeStamp = new Date();
 
     if (!textEl.value) return;
 
-    ws.send(JSON.stringify({ author, text: textEl.value }));
-    printMessage(true, { author, text: textEl.value });
+    if (!to.value) to.value = "all";
+
+    ws.send(
+        JSON.stringify({ author, text: textEl.value, timeStamp, to: to.value })
+    );
+    printMessage(true, { author, text: textEl.value, timeStamp });
 
     textEl.value = "";
 };
@@ -114,11 +126,15 @@ const getInfo = () => {
     })
         .then((res) => {
             if (res.ok) return res.json();
+            return res;
         })
         .then((res) => {
             const authorEl = document.querySelector("#author");
             authorEl.value = res.username;
-        });
+            authorEl.placeholder = res.username;
+            return res;
+        })
+        .catch((error) => console.error(error));
 };
 
 getInfo();
