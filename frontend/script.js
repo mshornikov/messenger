@@ -1,7 +1,10 @@
 const chatEl = document.querySelector("#chat");
 const formEl = document.querySelector("#message-form");
 
-const ws = new WebSocket(`ws://localhost:8000`);
+const WS_HOST = "ws://localhost:8000";
+const SERVER_HOST = "http://localhost:3001";
+
+const ws = new WebSocket(WS_HOST);
 
 /**
  * @param {boolean} isOwn
@@ -77,7 +80,7 @@ loginForm.addEventListener("submit", (event) => {
 
     console.log(username, password);
 
-    fetch("http://localhost:3001/login", {
+    fetch(`${SERVER_HOST}/login`, {
         method: "post",
         credentials: "include",
         headers: {
@@ -96,7 +99,7 @@ signUpForm.addEventListener("submit", (event) => {
 
     console.log(username, password);
 
-    fetch("http://localhost:3001/signup", {
+    fetch(`${SERVER_HOST}/signup`, {
         method: "post",
         headers: {
             "Content-Type": "application/json",

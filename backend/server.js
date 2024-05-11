@@ -7,7 +7,8 @@ import mongoose from "mongoose";
 
 const clients = {};
 
-const PORT = 8000;
+const SERVER_PORT = 3001;
+const WS_PORT = 8000;
 const DB_PORT = 27017;
 
 const uri = `mongodb://localhost:${DB_PORT}/messenger`;
@@ -32,7 +33,7 @@ const MessagesSchema = new mongoose.Schema({
 
 const Message = mongoose.model("Message", MessagesSchema);
 
-const wss = new WebSocketServer({ port: PORT });
+const wss = new WebSocketServer({ port: WS_PORT });
 
 wss.on("connection", (ws) => {
     const id = randomUUID();
@@ -197,9 +198,7 @@ const server = http.createServer((req, res) => {
     }
 });
 
-server.listen(3001, "127.0.0.1", () => {
-    console.log("Server running");
-});
+server.listen(SERVER_PORT);
 
 process.on("SIGINT", async () => {
     wss.close();
