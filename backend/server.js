@@ -96,7 +96,7 @@ const User = mongoose.model("User", UserSchema);
  * @param {http.IncomingMessage} res
  * @param {string} data
  */
-const signIn = async (res, data) => {
+const login = async (res, data) => {
     const { username, password } = JSON.parse(data);
 
     console.log("singIn", { username, password });
@@ -119,7 +119,6 @@ const signIn = async (res, data) => {
             const sessionId = randomUUID();
             res.writeHead(200, {
                 "Set-Cookie": `sessionId=${sessionId}`,
-                "Content-Type": "text/plain",
             });
         }
     } catch (error) {
@@ -191,7 +190,7 @@ const server = http.createServer((req, res) => {
             const reqUrl = url.parse(req.url).pathname;
 
             if (reqUrl === "/signup") req.on("end", () => signUp(res, data));
-            if (reqUrl === "/signin") req.on("end", () => signIn(res, data));
+            if (reqUrl === "/login") req.on("end", () => login(res, data));
             break;
         default:
             res.end();

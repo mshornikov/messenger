@@ -33,9 +33,8 @@ const printMessage = (isOwn, { author, text }) => {
     chatEl.appendChild(messageEl);
 };
 
-printMessage(1, "123");
-
 ws.onmessage = ({ data }) => {
+    /** @type {Array} */
     const messages = JSON.parse(data);
 
     console.log(messages);
@@ -69,30 +68,23 @@ const send = (event) => {
 
 formEl.addEventListener("submit", send);
 
-const signInForm = document.querySelector("#sign-in");
+const loginForm = document.querySelector("#login");
 
-signInForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    const username = signInForm.querySelector("#username").value;
-    const password = signInForm.querySelector("#password").value;
+    const username = loginForm.querySelector("#login-username").value;
+    const password = loginForm.querySelector("#login-password").value;
 
     console.log(username, password);
 
-    fetch("http://localhost:3001/signin", {
+    fetch("http://localhost:3001/login", {
         method: "post",
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
-    })
-        .then((res) => {
-            if (res.ok) return res.json();
-        })
-        .then(({ username }) => {
-            const author = document.querySelector("#author");
-            author.value = username;
-        });
+    });
 });
 
 const signUpForm = document.querySelector("#sign-up");
@@ -104,7 +96,7 @@ signUpForm.addEventListener("submit", (event) => {
 
     console.log(username, password);
 
-    fetch("http://localhost:3000/signup", {
+    fetch("http://localhost:3001/signup", {
         method: "post",
         headers: {
             "Content-Type": "application/json",

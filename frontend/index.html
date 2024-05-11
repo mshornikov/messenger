@@ -12,16 +12,28 @@
 </head>
 
 <body>
-    <form id="sign-in" method="post">
+    <form id="login">
         <label>
             Username
-            <input type="text" id="username" name="username">
+            <input type="text" id="login-username" name="username" autocomplete="username">
         </label>
         <label>
             Password
-            <input type="password" id="password" name="password">
+            <input type="password" id="login-password" name="password" autocomplete="current-password">
         </label>
-        <button type="submit">Sign in</button>
+        <button>Sign in</button>
+    </form>
+
+    <form id="sign-up">
+        <label>
+            Username
+            <input type="text" id="username" name="username" autocomplete="username">
+        </label>
+        <label>
+            Password
+            <input type="password" id="password" name="password" autocomplete="new-password">
+        </label>
+        <button>Sing up</button>
     </form>
 
     <main class="container">
@@ -32,25 +44,12 @@
             <input type="hidden" id="author" name="author" value="mshornikov">
             <input type="text" class="message-input message-block__text" id="text" name="text" placeholder="Message">
             <button class="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
-                    viewBox="0 -960 960 960" fill="white" style="vertical-align: middle; display: block;">
+                    viewBox="0 -960 960 960" fill="white" style="display: block;">
                     <path
                         d="M808-438 163-167q-23 10-43-3t-20-37v-546q0-23 20-36t43-6l645 272q28 12 28 43.5T808-438ZM181-264l515-216-515-218v146l252 72-252 71v145Zm0 0v-434 434Z" />
                 </svg></button>
         </form>
     </main>
-
-    <form id="sign-up" method="post">
-        <label>
-            Username
-            <input type="text" id="username" name="username">
-        </label>
-        <label>
-            Password
-            <input type="password" id="password" name="password">
-        </label>
-        <button type="submit">Sing up</button>
-    </form>
-
 </body>
 
 </html>
