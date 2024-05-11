@@ -1,10 +1,8 @@
 const chatEl = document.querySelector("#chat");
 const formEl = document.querySelector("#message-form");
 
-const WS_HOST = "ws://localhost:8000";
+const WS_HOST = "ws://localhost:3001";
 const SERVER_HOST = "http://localhost:3001";
-
-const ws = new WebSocket(WS_HOST);
 
 /**
  * @param {boolean} isOwn
@@ -36,22 +34,30 @@ const printMessage = (isOwn, { author, text }) => {
     chatEl.appendChild(messageEl);
 };
 
-ws.onmessage = ({ data }) => {
-    /** @type {Array} */
-    const messages = JSON.parse(data);
+let ws;
 
-    console.log(messages);
+const connect = () => {
+    ws = new WebSocket(WS_HOST);
 
-    for (const message of messages) {
-        const author = document.querySelector("#author").value;
-        const isOwn = author === message.author;
-        printMessage(isOwn, message);
-    }
+    ws.onmessage = ({ data }) => {
+        /** @type {Array} */
+        const messages = JSON.parse(data);
+
+        console.log(messages);
+
+        for (const message of messages) {
+            const author = document.querySelector("#author").value;
+            const isOwn = author === message.author;
+            printMessage(isOwn, message);
+        }
+    };
+
+    ws.onclose = () => {
+        ws.close();
+    };
 };
 
-ws.onclose = () => {
-    ws.close();
-};
+connect();
 
 /**
  * @param {SubmitEvent} event
@@ -87,20 +93,37 @@ loginForm.addEventListener("submit", (event) => {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
-    });
+    })
+        .then((res) => {
+            if (res.ok) return res.json();
+        })
+        .then((res) => {
+            chatEl.innerHTML = "";
+            connect();
+            const authorEl = document.querySelector("#author");
+            authorEl.value = res.username;
+            return res;
+        });
 });
 
 const getDataButton = document.querySelector("#get-data");
 
-getDataButton.addEventListener("click", () => {
+const getInfo = () => {
     fetch(`${SERVER_HOST}/info`, {
         credentials: "include",
     })
         .then((res) => {
             if (res.ok) return res.json();
         })
-        .then((res) => console.log(res));
-});
+        .then((res) => {
+            const authorEl = document.querySelector("#author");
+            authorEl.value = res.username;
+        });
+};
+
+getInfo();
+
+getDataButton.addEventListener("click", getInfo);
 
 const logoutButton = document.querySelector("#logout");
 

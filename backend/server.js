@@ -33,7 +33,7 @@ const MessagesSchema = new mongoose.Schema({
 
 const Message = mongoose.model("Message", MessagesSchema);
 
-const wss = new WebSocketServer({ port: WS_PORT });
+const wss = new WebSocketServer({ noServer: true });
 
 wss.on("connection", (ws) => {
     const id = randomUUID();
@@ -41,8 +41,12 @@ wss.on("connection", (ws) => {
 
     console.log(`New client ${id}`);
 
-    Message.find().then((value) => {
-        ws.send(JSON.stringify(value));
+    Message.find().then((data) => {
+        const messages = data.map(({ author, text }) => {
+            return { author, text };
+        });
+
+        ws.send(JSON.stringify(messages));
     });
 
     ws.on("message", (rawMessage) => {
@@ -136,6 +140,7 @@ const login = async (res, data) => {
             res.writeHead(200, {
                 "Set-Cookie": `sessionId=${sessionId}`,
             });
+            res.write(JSON.stringify({ username: user.username }));
         }
     } catch (error) {
         res.statusCode = 500;
@@ -197,7 +202,7 @@ const getInfo = async (req, res) => {
                 return;
             }
             res.statusCode = 200;
-            res.write(JSON.stringify(userData));
+            res.write(JSON.stringify({ username: userData.username }));
         } catch (error) {
             res.statusCode = 400;
         } finally {
@@ -287,6 +292,37 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(SERVER_PORT);
+
+server.on("upgrade", async (request, socket, head) => {
+    const cookieHeader = request.headers?.cookie;
+    console.log("cookie", cookieHeader);
+
+    if (cookieHeader) {
+        const sessionId = cookieHeader.match(/sessionId=(.*)/)[1];
+        const userData = await Session.findById(sessionId);
+        if (!userData) {
+            socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+            return;
+        }
+    } else {
+        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+        return;
+    }
+
+    // if (!authed) {
+    //     // \r\n\r\n: These are control characters used in HTTP to
+    //     // denote the end of the HTTP headers section.
+    //     socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+    //     socket.destroy();
+    //     return;
+    // }
+
+    wss.handleUpgrade(request, socket, head, (connection) => {
+        // Manually emit the 'connection' event on a WebSocket
+        // server (we subscribe to this event below).
+        wss.emit("connection", connection, request);
+    });
+});
 
 process.on("SIGINT", async () => {
     wss.close();
