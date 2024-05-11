@@ -90,6 +90,27 @@ loginForm.addEventListener("submit", (event) => {
     });
 });
 
+const getDataButton = document.querySelector("#get-data");
+
+getDataButton.addEventListener("click", () => {
+    fetch(`${SERVER_HOST}/info`, {
+        credentials: "include",
+    })
+        .then((res) => {
+            if (res.ok) return res.json();
+        })
+        .then((res) => console.log(res));
+});
+
+const logoutButton = document.querySelector("#logout");
+
+logoutButton.addEventListener("click", () => {
+    fetch(`${SERVER_HOST}/logout`, {
+        method: "post",
+        credentials: "include",
+    });
+});
+
 const signUpForm = document.querySelector("#sign-up");
 
 signUpForm.addEventListener("submit", (event) => {

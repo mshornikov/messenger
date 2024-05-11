@@ -93,6 +93,14 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema);
 
+const SessionSchema = new mongoose.Schema({
+    _id: String,
+    username: String,
+    userId: String,
+});
+
+const Session = mongoose.model("Session", SessionSchema);
+
 /**
  * @param {http.IncomingMessage} res
  * @param {string} data
@@ -118,6 +126,13 @@ const login = async (res, data) => {
 
         if (hashed === user.password) {
             const sessionId = randomUUID();
+
+            await Session.create({
+                _id: sessionId,
+                username: user.username,
+                userId: user.userId,
+            });
+
             res.writeHead(200, {
                 "Set-Cookie": `sessionId=${sessionId}`,
             });
@@ -165,6 +180,75 @@ const signUp = async (res, data) => {
     }
 };
 
+/**
+ * @param {http.ServerResponse} req
+ * @param {http.ServerResponse<http.IncomingMessage>} res
+ */
+const getInfo = async (req, res) => {
+    /** @type {string} */
+    const cookieHeader = req.headers?.cookie;
+    console.log(cookieHeader);
+    if (cookieHeader) {
+        const sessionId = cookieHeader.match(/sessionId=(.*)/)[1];
+        try {
+            const userData = await Session.findById(sessionId);
+            if (!userData) {
+                res.statusCode = 401;
+                return;
+            }
+            res.statusCode = 200;
+            res.write(JSON.stringify(userData));
+        } catch (error) {
+            res.statusCode = 400;
+        } finally {
+            res.end();
+        }
+    } else {
+        res.writeHead(401, {
+            "Content-Type": "text/plain",
+        });
+        res.write("No cookie");
+    }
+};
+
+/**
+ * @param {http.ServerResponse} req
+ * @param {http.ServerResponse<http.IncomingMessage>} res
+ */
+const logout = async (req, res) => {
+    /** @type {string} */
+    const cookieHeader = req.headers?.cookie;
+    console.log(cookieHeader);
+    if (cookieHeader) {
+        const sessionId = cookieHeader.match(/sessionId=(.*)/)[1];
+        try {
+            const userData = await Session.findById(sessionId);
+            if (!userData) {
+                res.statusCode = 401;
+                return;
+            }
+            try {
+                await Session.deleteOne({ _id: sessionId });
+                res.writeHead(200, {
+                    "set-cookie":
+                        "sessionId=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+                });
+            } catch (error) {
+                res.statusCode = 500;
+            }
+        } catch (error) {
+            res.statusCode = 500;
+        } finally {
+            res.end();
+        }
+    } else {
+        res.writeHead(401, {
+            "Content-Type": "text/plain",
+        });
+        res.write("No cookie");
+    }
+};
+
 const server = http.createServer((req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
     res.setHeader(
@@ -177,9 +261,14 @@ const server = http.createServer((req, res) => {
     );
     res.setHeader("Access-Control-Allow-Credentials", "true");
 
+    const reqUrl = url.parse(req.url).pathname;
+
     switch (req.method) {
         case "OPTIONS":
             res.end();
+            break;
+        case "GET":
+            if (reqUrl === "/info") getInfo(req, res);
             break;
         case "POST":
             let data = "";
@@ -188,10 +277,9 @@ const server = http.createServer((req, res) => {
                 data += chunk;
             });
 
-            const reqUrl = url.parse(req.url).pathname;
-
             if (reqUrl === "/signup") req.on("end", () => signUp(res, data));
             if (reqUrl === "/login") req.on("end", () => login(res, data));
+            if (reqUrl === "/logout") logout(req, res);
             break;
         default:
             res.end();
