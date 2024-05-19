@@ -3,6 +3,10 @@ import { SERVER_HOST } from "./hosts";
 const chatsPage = () => {
     const list = document.querySelector("#chats-list");
 
+    Notification.requestPermission().then((result) => {
+        console.log(result);
+    });
+
     fetch(`${SERVER_HOST}/users`, {
         credentials: "include",
         headers: {

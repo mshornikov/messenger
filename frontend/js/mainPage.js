@@ -13,6 +13,8 @@ const mainPage = () => {
     const chatEl = document.querySelector("#chat");
     const formEl = document.querySelector("#message-form");
 
+    const notifications = [];
+
     /**
      * @param {boolean} isOwn
      * @param {{ author: string, text: string, timeStamp: string }} messageInfo
@@ -65,7 +67,11 @@ const mainPage = () => {
                 if (author) {
                     console.log("username", author);
                     const isOwn = author === message.author;
-
+                    notifications.push(
+                        new Notification(message.author, {
+                            body: message.text,
+                        })
+                    );
                     printMessage(isOwn, message);
                 } else {
                     console.error("Cannot find username");
@@ -123,6 +129,12 @@ const mainPage = () => {
             }
             return res;
         });
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            notifications.forEach((n) => n.close());
+        }
     });
 };
 
