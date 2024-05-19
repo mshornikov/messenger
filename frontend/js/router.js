@@ -1,3 +1,4 @@
+import chatsPage from "./chatsPage";
 import loginPage from "./loginPage";
 import mainPage from "./mainPage";
 import registerPage from "./registerPage";
@@ -31,6 +32,11 @@ const urlLocationHandler = async () => {
         return;
     }
 
+    if (sessionId && (location === "/" || location === "/register")) {
+        routerPush("/chat");
+        return;
+    }
+
     // get the route object from the urlRoutes object
     const route = routes[location] || routes["404"];
     // get the html from the template
@@ -43,6 +49,7 @@ const urlLocationHandler = async () => {
     if (location === "/") loginPage();
     if (location === "/chat") mainPage();
     if (location === "/register") registerPage();
+    if (location === "/chats") chatsPage();
 };
 
 // add an event listener to the window that watches for url changes

@@ -11,6 +11,10 @@ const routes = {
         template: "/templates/index.html",
         title: "Chat",
     },
+    "/chats": {
+        template: "/templates/chats.html",
+        title: "Chats",
+    },
 };
 
 export default routes;

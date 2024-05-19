@@ -8,7 +8,6 @@ import mongoose from "mongoose";
 const clients = {};
 
 const SERVER_PORT = 3001;
-const WS_PORT = 8000;
 const DB_PORT = 27017;
 
 const uri = `mongodb://localhost:${DB_PORT}/messenger`;
@@ -187,7 +186,7 @@ const login = async (res, data) => {
 };
 
 /**
- * @param {http.IncomingMessage} res
+ * @param {http.ServerResponse<http.IncomingMessage>} res
  * @param {string} data
  */
 const signUp = async (res, data) => {
@@ -222,7 +221,7 @@ const signUp = async (res, data) => {
 };
 
 /**
- * @param {http.ServerResponse} req
+ * @param {http.IncomingMessage} req
  * @param {http.ServerResponse<http.IncomingMessage>} res
  */
 const logout = async (req, res) => {
@@ -232,32 +231,71 @@ const logout = async (req, res) => {
     if (cookieHeader) {
         const sessionId = cookieHeader.match(/sessionId=(.*);/)[1];
         try {
-            const userData = await Session.findById(sessionId);
-            if (!userData) {
-                res.statusCode = 401;
-                return;
-            }
-            try {
-                await Session.deleteOne({ _id: sessionId });
-                res.writeHead(200, {
-                    "set-cookie": [
-                        "sessionId=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
-                        "username=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
-                    ],
-                });
-            } catch (error) {
-                res.statusCode = 500;
-            }
+            await Session.deleteOne({ _id: sessionId });
         } catch (error) {
             res.statusCode = 500;
-        } finally {
             res.end();
         }
+        res.writeHead(200, {
+            "set-cookie": [
+                "sessionId=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+                "username=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+            ],
+        });
+        res.end();
     } else {
         res.writeHead(401, {
             "Content-Type": "text/plain",
         });
         res.write("No cookie");
+    }
+};
+
+/**
+ * @param {http.IncomingMessage} req
+ */
+const authorize = async (req) => {
+    const cookieHeader = req.headers?.cookie;
+    console.log(cookieHeader);
+    if (cookieHeader) {
+        const sessionId = cookieHeader.match(/sessionId=(.*);/)[1];
+        try {
+            const session = await Session.findById(sessionId);
+            if (session) return true;
+        } catch (error) {
+            console.log(error);
+        }
+        return false;
+    }
+    return false;
+};
+
+/**
+ * @param {http.ServerResponse} req
+ * @param {http.ServerResponse<http.IncomingMessage>} res
+ */
+const getUsers = async (req, res) => {
+    const isAuthorized = await authorize(req);
+
+    if (isAuthorized) {
+        try {
+            const users = (await User.find()).map(({ username, userId }) => {
+                return { username, userId };
+            });
+            res.writeHead(200, {
+                "content-type": "application/json",
+            });
+            res.write(JSON.stringify(users));
+        } catch (error) {
+            console.log(error);
+            res.statusCode = 500;
+        } finally {
+            res.end();
+        }
+    } else {
+        res.statusCode = 401;
+        res.end();
+        return;
     }
 };
 
@@ -280,6 +318,7 @@ const server = http.createServer((req, res) => {
             res.end();
             break;
         case "GET":
+            if (reqUrl === "/users") getUsers(req, res);
             break;
         case "POST":
             let data = "";
