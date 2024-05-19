@@ -45,14 +45,13 @@ wss.on("connection", (ws, _, sessionId) => {
     Message.find().then(async (data) => {
         const { username } = await Session.findOne({ _id: sessionId });
 
-        const messages = data.map(({ author, text, timeStamp, to }) => {
+        const messages = data.filter(({ author, text, timeStamp, to }) => {
             if (to === "all" || to === username || author === username) {
                 return { author, text, timeStamp };
             }
-            return;
         });
 
-        ws.send(JSON.stringify(messages));
+        if (messages) ws.send(JSON.stringify(messages));
     });
 
     ws.on("message", async (rawMessage) => {
@@ -172,7 +171,10 @@ const login = async (res, data) => {
             });
 
             res.writeHead(200, {
-                "Set-Cookie": `sessionId=${sessionId};SameSite=Strict;username=${username};`,
+                "Set-Cookie": [
+                    `sessionId=${sessionId};SameSite=Strict`,
+                    `username=${user.username};SameSite=Strict`,
+                ],
                 "Content-Type": "application/json",
             });
             res.end(JSON.stringify({ username: user.username }));
@@ -223,42 +225,12 @@ const signUp = async (res, data) => {
  * @param {http.ServerResponse} req
  * @param {http.ServerResponse<http.IncomingMessage>} res
  */
-const getInfo = async (req, res) => {
-    /** @type {string} */
-    const cookieHeader = req.headers?.cookie;
-
-    if (cookieHeader) {
-        const sessionId = cookieHeader.match(/sessionId=(.*)/)[1];
-        try {
-            const userData = await Session.findById(sessionId);
-            if (userData) {
-                res.statusCode = 200;
-                res.write(JSON.stringify({ username: userData.username }));
-            } else {
-                res.writeHead(401);
-            }
-        } catch (error) {
-            res.statusCode = 400;
-        }
-    } else {
-        res.writeHead(401, {
-            "Content-Type": "text/plain",
-        });
-        res.write("No cookie");
-    }
-    res.end();
-};
-
-/**
- * @param {http.ServerResponse} req
- * @param {http.ServerResponse<http.IncomingMessage>} res
- */
 const logout = async (req, res) => {
     /** @type {string} */
     const cookieHeader = req.headers?.cookie;
     console.log(cookieHeader);
     if (cookieHeader) {
-        const sessionId = cookieHeader.match(/sessionId=(.*)/)[1];
+        const sessionId = cookieHeader.match(/sessionId=(.*);/)[1];
         try {
             const userData = await Session.findById(sessionId);
             if (!userData) {
@@ -268,8 +240,10 @@ const logout = async (req, res) => {
             try {
                 await Session.deleteOne({ _id: sessionId });
                 res.writeHead(200, {
-                    "set-cookie":
+                    "set-cookie": [
                         "sessionId=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+                        "username=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+                    ],
                 });
             } catch (error) {
                 res.statusCode = 500;
@@ -306,7 +280,6 @@ const server = http.createServer((req, res) => {
             res.end();
             break;
         case "GET":
-            if (reqUrl === "/info") getInfo(req, res);
             break;
         case "POST":
             let data = "";
@@ -329,13 +302,16 @@ server.listen(SERVER_PORT);
 server.on("upgrade", async (request, socket, head) => {
     const cookieHeader = request.headers?.cookie;
     let sessionId;
+    console.log("cookies", cookieHeader);
     if (cookieHeader) {
-        const sessionString = cookieHeader.match(/sessionId=(.*)/);
+        const sessionString = cookieHeader.match(/sessionId=(.*); username/);
+        console.log(sessionString);
         if (sessionString) sessionId = sessionString[1];
         else {
             socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
             socket.end();
         }
+        console.log(sessionString[1]);
         const userData = await Session.findById(sessionId);
         if (userData) {
             wss.handleUpgrade(request, socket, head, (connection) => {

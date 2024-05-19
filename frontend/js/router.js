@@ -24,7 +24,7 @@ const urlLocationHandler = async () => {
 
     const cookieString = document.cookie;
     const sessionId = cookieString.match(/sessionId=(.*)/);
-    console.log(sessionId);
+    if (sessionId) console.log(sessionId[1]);
 
     if (!sessionId && location !== "/" && location !== "/register") {
         routerPush("/");

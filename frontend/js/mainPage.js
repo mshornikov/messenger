@@ -1,6 +1,14 @@
 import { SERVER_HOST, WS_HOST } from "./hosts";
 import { routerPush } from "./router";
 
+const getUsername = () => {
+    const cookieString = document.cookie;
+    console.log(cookieString);
+    const cookie = cookieString.match(/username=(.*)/);
+    if (cookie) return cookie[1];
+    return;
+};
+
 const mainPage = () => {
     const chatEl = document.querySelector("#chat");
     const formEl = document.querySelector("#message-form");
@@ -41,30 +49,10 @@ const mainPage = () => {
         chatEl.appendChild(messageEl);
     };
 
-    const getInfo = () =>
-        fetch(`${SERVER_HOST}/info`, {
-            credentials: "include",
-        })
-            .then((res) => {
-                if (res.ok) return res.json();
-                return res;
-            })
-            .then((res) => {
-                const authorEl = document.querySelector("#author");
-                if (authorEl) {
-                    authorEl.value = res.username;
-                    authorEl.placeholder = res.username;
-                }
-                return res;
-            })
-            .catch((error) => console.error(error));
-
     let ws;
 
-    const connect = async () => {
+    const connect = () => {
         ws = new WebSocket(WS_HOST);
-
-        await getInfo();
 
         ws.onmessage = ({ data }) => {
             /** @type {Array} */
@@ -73,9 +61,15 @@ const mainPage = () => {
             console.log(messages);
 
             for (const message of messages) {
-                const author = document.querySelector("#author").value;
-                const isOwn = author === message.author;
-                printMessage(isOwn, message);
+                const author = getUsername();
+                if (author) {
+                    console.log("username", author);
+                    const isOwn = author === message.author;
+
+                    printMessage(isOwn, message);
+                } else {
+                    console.error("Cannot find username");
+                }
             }
         };
 
@@ -91,7 +85,7 @@ const mainPage = () => {
      */
     const send = (event) => {
         event.preventDefault();
-        const author = formEl.querySelector("#author").value;
+        const author = getUsername();
         const textEl = formEl.querySelector("#text");
         const toEl = formEl.querySelector("#to");
         const timeStamp = new Date();
@@ -99,6 +93,8 @@ const mainPage = () => {
         if (!textEl.value) return;
 
         if (!to.value) to.value = "all";
+
+        if (!author) return;
 
         ws.send(
             JSON.stringify({
