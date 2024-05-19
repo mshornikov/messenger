@@ -44,7 +44,7 @@ let ws;
 
 const connect = () => {
     ws = new WebSocket(WS_HOST);
-
+    console.log("connect");
     ws.onmessage = ({ data }) => {
         /** @type {Array} */
         const messages = JSON.parse(data);
@@ -147,6 +147,11 @@ logoutButton.addEventListener("click", () => {
     fetch(`${SERVER_HOST}/logout`, {
         method: "post",
         credentials: "include",
+    }).then((res) => {
+        if (res.ok) {
+            chatEl.innerHTML = "";
+        }
+        return res;
     });
 });
 

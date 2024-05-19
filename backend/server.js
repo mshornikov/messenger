@@ -172,7 +172,7 @@ const login = async (res, data) => {
             });
 
             res.writeHead(200, {
-                "Set-Cookie": `sessionId=${sessionId}`,
+                "Set-Cookie": `sessionId=${sessionId};SameSite=Strict`,
             });
             res.write(JSON.stringify({ username: user.username }));
         }
@@ -231,16 +231,14 @@ const getInfo = async (req, res) => {
         const sessionId = cookieHeader.match(/sessionId=(.*)/)[1];
         try {
             const userData = await Session.findById(sessionId);
-            if (!userData) {
-                res.statusCode = 401;
-                return;
+            if (userData) {
+                res.statusCode = 200;
+                res.write(JSON.stringify({ username: userData.username }));
+            } else {
+                res.writeHead(401);
             }
-            res.statusCode = 200;
-            res.write(JSON.stringify({ username: userData.username }));
         } catch (error) {
             res.statusCode = 400;
-        } finally {
-            res.end();
         }
     } else {
         res.writeHead(401, {
@@ -248,6 +246,7 @@ const getInfo = async (req, res) => {
         });
         res.write("No cookie");
     }
+    res.end();
 };
 
 /**
@@ -333,20 +332,23 @@ server.on("upgrade", async (request, socket, head) => {
     if (cookieHeader) {
         const sessionString = cookieHeader.match(/sessionId=(.*)/);
         if (sessionString) sessionId = sessionString[1];
-        else return;
-        const userData = await Session.findById(sessionId);
-        if (!userData) {
+        else {
             socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-            return;
+            socket.end();
+        }
+        const userData = await Session.findById(sessionId);
+        if (userData) {
+            wss.handleUpgrade(request, socket, head, (connection) => {
+                wss.emit("connection", connection, request, sessionId);
+            });
+        } else {
+            socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+            socket.end();
         }
     } else {
         socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-        return;
+        socket.end();
     }
-
-    wss.handleUpgrade(request, socket, head, (connection) => {
-        wss.emit("connection", connection, request, sessionId);
-    });
 });
 
 process.on("SIGINT", async () => {
