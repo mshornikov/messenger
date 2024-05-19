@@ -67,11 +67,19 @@ const mainPage = () => {
                 if (author) {
                     console.log("username", author);
                     const isOwn = author === message.author;
-                    notifications.push(
-                        new Notification(message.author, {
-                            body: message.text,
-                        })
-                    );
+
+                    if (Notification?.permission === "granted") {
+                        notifications.push(
+                            new Notification(message.author, {
+                                body: message.text,
+                                tag: message.author,
+                            })
+                        );
+                    } else {
+                        Notification.requestPermission().then((result) => {
+                            console.log(result);
+                        });
+                    }
                     printMessage(isOwn, message);
                 } else {
                     console.error("Cannot find username");
