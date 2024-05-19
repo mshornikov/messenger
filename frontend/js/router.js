@@ -37,9 +37,12 @@ const urlLocationHandler = async () => {
         return;
     }
 
-    // get the route object from the urlRoutes object
-    const route = routes[location] || routes["404"];
-    // get the html from the template
+    let route = routes[location] || routes["404"];
+
+    if (location.startsWith("/chat/")) {
+        route = routes["/chat"];
+    }
+
     const html = await fetch(route.template).then((response) =>
         response.text()
     );
@@ -47,7 +50,7 @@ const urlLocationHandler = async () => {
     document.getElementById("content").innerHTML = html;
     document.title = route.title;
     if (location === "/") loginPage();
-    if (location === "/chat") mainPage();
+    if (location.startsWith("/chat/") || location === "/chat") mainPage();
     if (location === "/register") registerPage();
     if (location === "/chats") chatsPage();
 };

@@ -17,7 +17,7 @@ const chatsPage = () => {
             res.forEach((i) => {
                 const item = document.createElement("li");
                 const link = document.createElement("a");
-                link.href = `/chat/${i.userId}`;
+                link.href = `/chat/${i.username}`;
                 link.innerText = i.username;
                 item.appendChild(link);
                 list.appendChild(item);

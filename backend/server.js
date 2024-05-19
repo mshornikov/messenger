@@ -229,12 +229,17 @@ const logout = async (req, res) => {
     const cookieHeader = req.headers?.cookie;
     console.log(cookieHeader);
     if (cookieHeader) {
-        const sessionId = cookieHeader.match(/sessionId=(.*);/)[1];
-        try {
-            await Session.deleteOne({ _id: sessionId });
-        } catch (error) {
-            res.statusCode = 500;
-            res.end();
+        const sessionCookie = cookieHeader.match(/sessionId=(.*);/);
+
+        if (sessionCookie) {
+            const sessionId = sessionCookie[1];
+
+            try {
+                await Session.deleteOne({ _id: sessionId });
+            } catch (error) {
+                res.statusCode = 500;
+                res.end();
+            }
         }
         res.writeHead(200, {
             "set-cookie": [
@@ -261,7 +266,7 @@ const authorize = async (req) => {
         const sessionId = cookieHeader.match(/sessionId=(.*);/)[1];
         try {
             const session = await Session.findById(sessionId);
-            if (session) return true;
+            if (session) return session;
         } catch (error) {
             console.log(error);
         }
@@ -275,13 +280,15 @@ const authorize = async (req) => {
  * @param {http.ServerResponse<http.IncomingMessage>} res
  */
 const getUsers = async (req, res) => {
-    const isAuthorized = await authorize(req);
+    const user = await authorize(req);
 
-    if (isAuthorized) {
+    if (user) {
         try {
-            const users = (await User.find()).map(({ username, userId }) => {
-                return { username, userId };
-            });
+            const users = (await User.find())
+                .map(({ username, userId }) => {
+                    return { username, userId };
+                })
+                .filter(({ username }) => username !== user.username);
             res.writeHead(200, {
                 "content-type": "application/json",
             });
@@ -350,7 +357,7 @@ server.on("upgrade", async (request, socket, head) => {
             socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
             socket.end();
         }
-        console.log(sessionString[1]);
+
         const userData = await Session.findById(sessionId);
         if (userData) {
             wss.handleUpgrade(request, socket, head, (connection) => {

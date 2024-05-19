@@ -87,12 +87,12 @@ const mainPage = () => {
         event.preventDefault();
         const author = getUsername();
         const textEl = formEl.querySelector("#text");
-        const toEl = formEl.querySelector("#to");
+        let recipient = window.location.pathname.match(/\/chat\/(.*)/)[1];
         const timeStamp = new Date();
 
         if (!textEl.value) return;
 
-        if (!to.value) to.value = "all";
+        if (!recipient) recipient = "all";
 
         if (!author) return;
 
@@ -101,7 +101,7 @@ const mainPage = () => {
                 author,
                 text: textEl.value,
                 timeStamp,
-                to: to.value,
+                to: recipient,
             })
         );
         printMessage(true, { author, text: textEl.value, timeStamp });
