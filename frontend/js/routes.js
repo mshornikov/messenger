@@ -1,19 +1,19 @@
 const routes = {
     "/": {
-        template: "/templates/login.html",
-        title: "Login",
+        template: "/templates/chats.html",
+        title: "Messenger",
     },
     "/register": {
         template: "/templates/register.html",
         title: "Register",
     },
+    "/login": {
+        template: "/templates/login.html",
+        title: "Login",
+    },
     "/chat": {
         template: "/templates/index.html",
-        title: "Chat",
-    },
-    "/chats": {
-        template: "/templates/chats.html",
-        title: "Chats",
+        title: "Login",
     },
 };
 

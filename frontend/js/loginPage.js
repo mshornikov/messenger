@@ -20,7 +20,7 @@ const loginPage = () => {
             body: JSON.stringify({ username, password }),
         })
             .then((res) => {
-                if (res.ok) routerPush("/chat");
+                if (res.ok) routerPush("/");
                 return res.json();
             })
             .then((res) => {

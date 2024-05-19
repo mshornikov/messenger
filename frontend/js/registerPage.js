@@ -18,7 +18,7 @@ const registerPage = () => {
             },
             body: JSON.stringify({ username, password }),
         }).then((res) => {
-            if (res.ok) routerPush("/");
+            if (res.ok) routerPush("/login");
             return res;
         });
     });

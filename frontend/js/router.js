@@ -21,25 +21,25 @@ export const routerPush = (href) => {
 const urlLocationHandler = async () => {
     let location = window.location.pathname;
 
-    if (location.length == 0) location = "/";
+    if (location.length == 0) location = "/login";
 
     const cookieString = document.cookie;
     const sessionId = cookieString.match(/sessionId=(.*)/);
     if (sessionId) console.log(sessionId[1]);
 
-    if (!sessionId && location !== "/" && location !== "/register") {
-        routerPush("/");
+    if (!sessionId && location !== "/login" && location !== "/register") {
+        routerPush("/login");
         return;
     }
 
-    if (sessionId && (location === "/" || location === "/register")) {
-        routerPush("/chat");
+    if (sessionId && (location === "/login" || location === "/register")) {
+        routerPush("/");
         return;
     }
 
     let route = routes[location] || routes["404"];
 
-    if (location.startsWith("/chat/")) {
+    if (location.startsWith("/chat")) {
         route = routes["/chat"];
     }
 
@@ -49,15 +49,12 @@ const urlLocationHandler = async () => {
 
     document.getElementById("content").innerHTML = html;
     document.title = route.title;
-    if (location === "/") loginPage();
-    if (location.startsWith("/chat/") || location === "/chat") mainPage();
+    if (location === "/") chatsPage();
     if (location === "/register") registerPage();
-    if (location === "/chats") chatsPage();
+    if (location === "/login") loginPage();
+    if (location.startsWith("/chat")) mainPage();
 };
 
-// add an event listener to the window that watches for url changes
 window.onpopstate = urlLocationHandler;
-// call the urlLocationHandler function to handle the initial url
 window.route = routerPush;
-// call the urlLocationHandler function to handle the initial url
 urlLocationHandler();
