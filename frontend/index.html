@@ -8,52 +8,11 @@
     <link rel="stylesheet" href="/style.css">
     <link rel="manifest" href="/manifest.json">
     <title>Messenger</title>
-    <script src="/script.js" defer type="module"></script>
+    <script src="/js/router.js" defer type="module"></script>
 </head>
 
 <body>
-    <form id="login">
-        <label>
-            Username
-            <input type="text" id="login-username" name="username" autocomplete="username">
-        </label>
-        <label>
-            Password
-            <input type="password" id="login-password" name="password" autocomplete="current-password">
-        </label>
-        <button>Sign in</button>
-    </form>
-
-    <form id="sign-up">
-        <label>
-            Username
-            <input type="text" id="username" name="username" autocomplete="username">
-        </label>
-        <label>
-            Password
-            <input type="password" id="password" name="password" autocomplete="new-password">
-        </label>
-        <button>Sing up</button>
-    </form>
-
-    <button id="get-data">Get data</button>
-    <button id="logout">Logout</button>
-
-    <main class="container">
-
-        <ul class="chat" id="chat"></ul>
-
-        <form class="message-block" id="message-form" method="post">
-            <input type="hidden" id="author" name="author">
-            <input type="text" id="to">
-            <input type="text" class="message-input message-block__text" id="text" name="text" placeholder="Message">
-            <button class="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
-                    viewBox="0 -960 960 960" fill="white" style="display: block;">
-                    <path
-                        d="M808-438 163-167q-23 10-43-3t-20-37v-546q0-23 20-36t43-6l645 272q28 12 28 43.5T808-438ZM181-264l515-216-515-218v146l252 72-252 71v145Zm0 0v-434 434Z" />
-                </svg></button>
-        </form>
-    </main>
+    <main id="content"></main>
 </body>
 
 </html>

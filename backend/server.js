@@ -140,13 +140,13 @@ const SessionSchema = new mongoose.Schema({
 const Session = mongoose.model("Session", SessionSchema);
 
 /**
- * @param {http.IncomingMessage} res
+ * @param {http.ServerResponse<http.IncomingMessage>} res
  * @param {string} data
  */
 const login = async (res, data) => {
     const { username, password } = JSON.parse(data);
 
-    console.log("singIn", { username, password });
+    console.log("login", { username, password });
 
     try {
         const user = await User.findOne({ username: username });
@@ -172,14 +172,14 @@ const login = async (res, data) => {
             });
 
             res.writeHead(200, {
-                "Set-Cookie": `sessionId=${sessionId};SameSite=Strict`,
+                "Set-Cookie": `sessionId=${sessionId};SameSite=Strict;username=${username};`,
+                "Content-Type": "application/json",
             });
-            res.write(JSON.stringify({ username: user.username }));
+            res.end(JSON.stringify({ username: user.username }));
         }
     } catch (error) {
         res.statusCode = 500;
         res.write("Server error");
-    } finally {
         res.end();
     }
 };

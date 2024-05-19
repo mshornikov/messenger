@@ -89,37 +89,6 @@ const send = (event) => {
 
 formEl.addEventListener("submit", send);
 
-const loginForm = document.querySelector("#login");
-
-loginForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const username = loginForm.querySelector("#login-username").value;
-    const password = loginForm.querySelector("#login-password").value;
-
-    console.log(username, password);
-
-    fetch(`${SERVER_HOST}/login`, {
-        method: "post",
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-    })
-        .then((res) => {
-            if (res.ok) return res.json();
-        })
-        .then((res) => {
-            chatEl.innerHTML = "";
-            connect();
-            const authorEl = document.querySelector("#author");
-            authorEl.value = res.username;
-            return res;
-        });
-});
-
-const getDataButton = document.querySelector("#get-data");
-
 const getInfo = () => {
     fetch(`${SERVER_HOST}/info`, {
         credentials: "include",
@@ -130,16 +99,16 @@ const getInfo = () => {
         })
         .then((res) => {
             const authorEl = document.querySelector("#author");
-            authorEl.value = res.username;
-            authorEl.placeholder = res.username;
+            if (authorEl) {
+                authorEl.value = res.username;
+                authorEl.placeholder = res.username;
+            }
             return res;
         })
         .catch((error) => console.error(error));
 };
 
 getInfo();
-
-getDataButton.addEventListener("click", getInfo);
 
 const logoutButton = document.querySelector("#logout");
 
@@ -152,23 +121,5 @@ logoutButton.addEventListener("click", () => {
             chatEl.innerHTML = "";
         }
         return res;
-    });
-});
-
-const signUpForm = document.querySelector("#sign-up");
-
-signUpForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const username = signUpForm.querySelector("#username").value;
-    const password = signUpForm.querySelector("#password").value;
-
-    console.log(username, password);
-
-    fetch(`${SERVER_HOST}/signup`, {
-        method: "post",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
     });
 });
