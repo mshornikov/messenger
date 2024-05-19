@@ -6,6 +6,7 @@
 
 html {
     font-family: sans-serif;
+    scroll-behavior: smooth;
 }
 
 input,
@@ -71,6 +72,8 @@ button {
 
 .chat {
     list-style: none;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .chat__message {

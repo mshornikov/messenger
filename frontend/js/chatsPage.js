@@ -1,11 +1,18 @@
 import { SERVER_HOST } from "./hosts";
 
-const chatsPage = () => {
-    const list = document.querySelector("#chats-list");
+const askForNotifications = () => {
+    if (!("Notification" in window)) {
+        console.log("This browser does not support notifications.");
+        return;
+    }
 
-    Notification.requestPermission().then((result) => {
+    Notification?.requestPermission().then((result) => {
         console.log(result);
     });
+};
+
+const chatsPage = () => {
+    const list = document.querySelector("#chats-list");
 
     fetch(`${SERVER_HOST}/users`, {
         credentials: "include",

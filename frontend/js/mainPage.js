@@ -49,6 +49,7 @@ const mainPage = () => {
         messageEl.appendChild(timeStampEl);
 
         chatEl.appendChild(messageEl);
+        messageEl.scrollIntoView({ behavior: "smooth", block: "end" });
     };
 
     let ws;
@@ -68,17 +69,19 @@ const mainPage = () => {
                     console.log("username", author);
                     const isOwn = author === message.author;
 
-                    if (Notification?.permission === "granted") {
-                        notifications.push(
-                            new Notification(message.author, {
-                                body: message.text,
-                                tag: message.author,
-                            })
-                        );
-                    } else {
-                        Notification.requestPermission().then((result) => {
-                            console.log(result);
-                        });
+                    if ("Notification" in window) {
+                        if (Notification?.permission === "granted") {
+                            notifications.push(
+                                new Notification(message.author, {
+                                    body: message.text,
+                                    tag: message.author,
+                                })
+                            );
+                        } else {
+                            Notification?.requestPermission().then((result) => {
+                                console.log(result);
+                            });
+                        }
                     }
                     printMessage(isOwn, message);
                 } else {
