@@ -176,7 +176,7 @@ const login = async (res, data) => {
                 ],
                 "Content-Type": "application/json",
             });
-            res.end(JSON.stringify({ username: user.username }));
+            res.end();
         }
     } catch (error) {
         res.statusCode = 500;
