@@ -18,15 +18,10 @@ const loginPage = () => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ username, password }),
-        })
-            .then((res) => {
-                if (res.ok) routerPush("/");
-                return res.json();
-            })
-            .then((res) => {
-                console.log(res);
-                return res;
-            });
+        }).then((res) => {
+            if (res.ok) routerPush("/");
+            return res;
+        });
     });
 };
 
