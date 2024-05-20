@@ -1,15 +1,16 @@
-<h1>Вход в аккаунт</h1>
+<h1 class="page-title form__title">Войти</h1>
 
-<form id="login">
-    <label>
-        Username
-        <input type="text" id="login-username" name="username" autocomplete="username" autocapitalize="off">
+<form id="login" class="form">
+    <label class="input-group">
+        <p class="input-group__label">Username</p>
+        <input type="text" class="input" id="login-username" name="username" autocomplete="username"
+            autocapitalize="off">
     </label>
-    <label>
-        Password
-        <input type="password" id="login-password" name="password" autocomplete="current-password" autocapitalize="off">
+    <label class="input-group">
+        <p class="input-group__label">Password</p>
+        <input type="password" class="input" id="login-password" name="password" autocomplete="current-password"
+            autocapitalize="off">
     </label>
-    <button class="button">Войти</button>
+    <button class="button form__button">Войти</button>
+    <a href="/register" class="link form__link">Ещё нету аккаунта?</a>
 </form>
-
-<a href="/register">Ещё нету аккаунта?</a>

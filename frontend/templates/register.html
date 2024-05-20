@@ -1,15 +1,15 @@
-<h1>Регистрация</h1>
+<h1 class="page-title form__title">Регистрация</h1>
 
-<form id="sign-up">
-    <label>
-        Username
-        <input type="text" id="username" name="username" autocomplete="username" autocapitalize="off">
+<form id="sign-up" class="form">
+    <label class="input-group">
+        <p class="input-group__label">Username</p>
+        <input class="input" type="text" id="username" name="username" autocomplete="username" autocapitalize="off">
     </label>
-    <label>
-        Password
-        <input type="password" id="password" name="password" autocomplete="new-password" autocapitalize="off">
+    <label class="input-group">
+        <p class="input-group__label">Password</p>
+        <input class="input" type="password" id="password" name="password" autocomplete="new-password"
+            autocapitalize="off">
     </label>
-    <button class="button">Зарегистрироваться</button>
+    <button class="button form__button">Зарегистрироваться</button>
+    <a href="/login" class="link form__link">Уже есть аккаунт?</a>
 </form>
-
-<a href="/login">Уже есть аккаунт?</a>
