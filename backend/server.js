@@ -174,7 +174,6 @@ const login = async (res, data) => {
                     `sessionId=${sessionId};SameSite=Strict`,
                     `username=${user.username};SameSite=Strict`,
                 ],
-                "Content-Type": "application/json",
             });
             res.end();
         }
