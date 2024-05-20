@@ -2,14 +2,20 @@ import { SERVER_HOST } from "./hosts";
 import { routerPush } from "./router";
 
 const askForNotifications = () => {
-    if (!("Notification" in window)) {
-        console.log("This browser does not support notifications.");
-        return;
-    }
+    if ("Notification" in window) {
+        if (!("Notification" in window)) {
+            console.log("This browser does not support notifications.");
+            return;
+        }
 
-    Notification?.requestPermission().then((result) => {
-        console.log(result);
-    });
+        try {
+            Notification?.requestPermission().then((result) => {
+                console.log(result);
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
 };
 
 const chatsPage = () => {
@@ -24,9 +30,7 @@ const chatsPage = () => {
             method: "post",
             credentials: "include",
         }).then((res) => {
-            if (res.ok) {
-                routerPush("/");
-            }
+            routerPush("/login");
             return res;
         });
     });
@@ -38,6 +42,7 @@ const chatsPage = () => {
         },
     })
         .then((res) => {
+            if (res.status === 401) routerPush("/login");
             return res.json();
         })
         .then((res) => {
@@ -59,7 +64,8 @@ const chatsPage = () => {
             });
 
             return res;
-        });
+        })
+        .catch((error) => console.error(error));
 };
 
 export default chatsPage;

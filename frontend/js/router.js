@@ -21,10 +21,11 @@ export const routerPush = (href) => {
 const urlLocationHandler = async () => {
     let location = window.location.pathname;
 
-    if (location.length == 0) location = "/login";
-
     const cookieString = document.cookie;
     const sessionId = cookieString.match(/sessionId=(.*)/);
+
+    if (location.length == 0) location = "/login";
+
     if (sessionId) console.log(sessionId[1]);
 
     if (!sessionId && location !== "/login" && location !== "/register") {
@@ -33,6 +34,7 @@ const urlLocationHandler = async () => {
     }
 
     if (sessionId && (location === "/login" || location === "/register")) {
+        console.log(sessionId);
         routerPush("/");
         return;
     }

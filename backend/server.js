@@ -236,23 +236,18 @@ const logout = async (req, res) => {
             try {
                 await Session.deleteOne({ _id: sessionId });
             } catch (error) {
-                res.statusCode = 500;
-                res.end();
+                console.log(error);
             }
         }
-        res.writeHead(200, {
-            "set-cookie": [
-                "sessionId=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
-                "username=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
-            ],
-        });
-        res.end();
-    } else {
-        res.writeHead(401, {
-            "Content-Type": "text/plain",
-        });
-        res.write("No cookie");
     }
+
+    res.writeHead(200, {
+        "set-cookie": [
+            "sessionId=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+            "username=none; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+        ],
+    });
+    res.end();
 };
 
 /**

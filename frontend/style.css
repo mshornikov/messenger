@@ -21,10 +21,9 @@ button {
 }
 
 .container {
-    /* position: fixed; */
-    /* bottom: 2.5rem;
-    left: 0;
-    right: 0; */
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - 3rem);
 }
 
 .message-block {
@@ -49,6 +48,12 @@ button {
     outline: 2px solid royalblue;
 }
 
+.page-title {
+    font-size: 2.3rem;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+}
+
 .send-button {
     cursor: pointer;
     background: dodgerblue;
@@ -70,7 +75,7 @@ button {
 }
 
 .message__time {
-    color: gainsboro;
+    color: silver;
     text-align: end;
     margin-top: 0.3rem;
     font-size: 0.75rem;
@@ -78,14 +83,29 @@ button {
 }
 
 .chat {
+    display: block;
     list-style: none;
-    max-height: 80vh;
+    max-height: 80dvh;
+    padding-right: 0.5rem;
     overflow-y: auto;
-    margin-block: 1rem 2rem;
+    margin-top: auto;
+    scrollbar-color: red;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: darkgray;
+    border-radius: 3px;
 }
 
 .chat__name {
     margin-bottom: 0;
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: start;
 }
 
 .chat__message {
@@ -102,17 +122,12 @@ button {
     list-style: none;
 }
 
-.page-title {
-    font-size: 2.3rem;
-    margin-top: 3rem;
-    margin-bottom: 2rem;
-}
-
 .chats-list__item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1.5rem;
+    font-size: 1.2rem;
     border-radius: 1.5rem;
     background-color: whitesmoke;
     text-decoration: none;
@@ -151,7 +166,8 @@ button {
 }
 
 .button--gray {
-    background: silver;
+    color: mediumpurple;
+    background: lavender;
 }
 
 .button--gray:hover {
@@ -204,4 +220,8 @@ button {
     color: royalblue;
     text-decoration-thickness: 1.5px;
     text-underline-offset: 4px;
+}
+
+.logout__button {
+    margin-bottom: 3rem;
 }

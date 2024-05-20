@@ -16,7 +16,7 @@ const mainPage = () => {
     const notifications = [];
 
     const chatTitle = document.querySelector(".chat__name");
-    chatTitle.innerText = recipient;
+    chatTitle.innerHTML += recipient;
 
     /**
      * @param {boolean} isOwn
@@ -38,9 +38,12 @@ const mainPage = () => {
 
         const timeStampEl = document.createElement("div");
         timeStampEl.classList.add("message__time");
-        timeStampEl.innerText = new Date(timeStamp).toLocaleTimeString([], {
-            timeStyle: "short",
-        });
+        timeStampEl.innerText = new Date(timeStamp).toLocaleTimeString(
+            "ru-RU",
+            {
+                timeStyle: "short",
+            }
+        );
 
         messageEl.appendChild(textEl);
         messageEl.appendChild(timeStampEl);
