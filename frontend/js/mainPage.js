@@ -1,5 +1,4 @@
-import { SERVER_HOST, WS_HOST } from "./hosts";
-import { routerPush } from "./router";
+import { WS_HOST } from "./hosts";
 
 const getUsername = () => {
     const cookieString = document.cookie;
@@ -12,8 +11,12 @@ const getUsername = () => {
 const mainPage = () => {
     const chatEl = document.querySelector("#chat");
     const formEl = document.querySelector("#message-form");
+    const recipient = window.location.pathname.match(/\/chat\/(.*)/)[1];
 
     const notifications = [];
+
+    const chatTitle = document.querySelector(".chat__name");
+    chatTitle.innerText = recipient;
 
     /**
      * @param {boolean} isOwn
@@ -30,17 +33,11 @@ const mainPage = () => {
 
         messageEl.classList.add(messageClassModifier);
 
-        if (!isOwn) {
-            const authorEl = document.createElement("div");
-            authorEl.classList.add("message__author");
-            authorEl.innerText = author;
-            messageEl.appendChild(authorEl);
-        }
-
         const textEl = document.createElement("span");
         textEl.innerText = text;
 
         const timeStampEl = document.createElement("div");
+        timeStampEl.classList.add("message__time");
         timeStampEl.innerText = new Date(timeStamp).toLocaleTimeString([], {
             timeStyle: "short",
         });
@@ -104,12 +101,10 @@ const mainPage = () => {
         event.preventDefault();
         const author = getUsername();
         const textEl = formEl.querySelector("#text");
-        let recipient = window.location.pathname.match(/\/chat\/(.*)/)[1];
+
         const timeStamp = new Date();
 
         if (!textEl.value) return;
-
-        if (!recipient) recipient = "all";
 
         if (!author) return;
 
@@ -127,20 +122,6 @@ const mainPage = () => {
     };
 
     formEl.addEventListener("submit", send);
-
-    const logoutButton = document.querySelector("#logout");
-
-    logoutButton.addEventListener("click", () => {
-        fetch(`${SERVER_HOST}/logout`, {
-            method: "post",
-            credentials: "include",
-        }).then((res) => {
-            if (res.ok) {
-                routerPush("/");
-            }
-            return res;
-        });
-    });
 
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {

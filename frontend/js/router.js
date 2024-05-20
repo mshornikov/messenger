@@ -47,7 +47,7 @@ const urlLocationHandler = async () => {
         response.text()
     );
 
-    document.getElementById("content").innerHTML = html;
+    document.querySelector(".content").innerHTML = html;
     document.title = route.title;
     if (location === "/") chatsPage();
     if (location === "/register") registerPage();

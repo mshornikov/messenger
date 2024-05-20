@@ -14,14 +14,17 @@ button {
     font-size: inherit;
 }
 
-.container {
-    position: fixed;
+.content {
     max-width: 800px;
     margin-inline: auto;
     padding-inline: 1rem;
-    bottom: 2.5rem;
+}
+
+.container {
+    /* position: fixed; */
+    /* bottom: 2.5rem;
     left: 0;
-    right: 0;
+    right: 0; */
 }
 
 .message-block {
@@ -57,7 +60,8 @@ button {
 }
 
 .message {
-    width: auto;
+    width: fit-content;
+    min-width: 3ch;
     max-width: 20rem;
     background-color: whitesmoke;
     padding: 0.5rem 0.8rem;
@@ -65,15 +69,23 @@ button {
     border-radius: 1rem;
 }
 
-.message__author {
-    color: silver;
-    font-size: 0.9rem;
+.message__time {
+    color: gainsboro;
+    text-align: end;
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    margin-left: 0.3rem;
 }
 
 .chat {
     list-style: none;
     max-height: 80vh;
     overflow-y: auto;
+    margin-block: 1rem 2rem;
+}
+
+.chat__name {
+    margin-bottom: 0;
 }
 
 .chat__message {
@@ -84,4 +96,46 @@ button {
     margin-left: auto;
     background-color: dodgerblue;
     color: white;
+}
+
+.chats-list {
+    list-style: none;
+}
+
+.chats-list__title {
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+}
+
+.chats-list__item {
+    display: block;
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+    background-color: whitesmoke;
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.chats-list__item:hover {
+    background-color: gainsboro;
+    cursor: pointer;
+}
+
+.button {
+    cursor: pointer;
+    background: dodgerblue;
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+}
+
+.button:hover {
+    background: rgb(0, 126, 251);
+}
+
+.button:active {
+    background: rgb(0, 90, 179);
 }

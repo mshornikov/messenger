@@ -1,4 +1,5 @@
 import { SERVER_HOST } from "./hosts";
+import { routerPush } from "./router";
 
 const askForNotifications = () => {
     if (!("Notification" in window)) {
@@ -12,7 +13,23 @@ const askForNotifications = () => {
 };
 
 const chatsPage = () => {
-    const list = document.querySelector("#chats-list");
+    const list = document.querySelector(".chats-list");
+
+    askForNotifications();
+
+    const logoutButton = document.querySelector("#logout");
+
+    logoutButton.addEventListener("click", () => {
+        fetch(`${SERVER_HOST}/logout`, {
+            method: "post",
+            credentials: "include",
+        }).then((res) => {
+            if (res.ok) {
+                routerPush("/");
+            }
+            return res;
+        });
+    });
 
     fetch(`${SERVER_HOST}/users`, {
         credentials: "include",
@@ -28,6 +45,7 @@ const chatsPage = () => {
             res.forEach((i) => {
                 const item = document.createElement("li");
                 const link = document.createElement("a");
+                link.classList.add("chats-list__item");
                 link.href = `/chat/${i.username}`;
                 link.innerText = i.username;
                 item.appendChild(link);

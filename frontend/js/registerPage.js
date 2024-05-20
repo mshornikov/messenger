@@ -17,10 +17,12 @@ const registerPage = () => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ username, password }),
-        }).then((res) => {
-            if (res.ok) routerPush("/login");
-            return res;
-        });
+        })
+            .then((res) => res.json())
+            .then((res) => {
+                if (res.ok) routerPush("/login");
+                return res;
+            });
     });
 };
 
